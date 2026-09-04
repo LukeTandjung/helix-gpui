@@ -4,11 +4,15 @@ Status: proposed direction, not an implemented architecture.
 
 ## Product goal
 
-Build a GPUI version of Helix that preserves its editing behavior while adding a minimal GUI:
+Build a GPUI version of Helix that preserves its editing behavior.
 
+**The immediate priority is the main editor itself:** working Helix editing behavior, reliable rendering, input and focus handling, and performance. This is the planned weekend focus. File-tree integration, Pierre ports, diffs, and surrounding UI must not delay or drive that work; pursue them only if time remains.
+
+Longer-term additions remain:
+
+- Inline live previews, with blocks switching between source and rendered content.
 - A left-hand file tree that also hosts file-search results instead of a central picker.
 - A diff viewer.
-- Inline live previews, with blocks switching between source and rendered content.
 
 Combine the strengths of three projects without retaining three competing editor engines:
 
@@ -29,6 +33,22 @@ The preferred longer-term integration base is a maintained Helix fork with a GPU
 That workspace move is a separate migration decision. Creating this frontend fork does not itself consolidate the Helix and Kioto repositories.
 
 Do not reorganise all of upstream Helix into Kioto's folder structure. Apply the desired architecture to new product code and extract shared Helix behavior only when a concrete frontend need requires it.
+
+## Planned UI libraries and ports
+
+Luke plans to use GPUI ports of Pierre's file tree and diffs. He reports that the file-tree port already exists, but its architecture still needs refinement. Its integration here and further Pierre porting are secondary to getting the main editor working; the diff port is planned, not established as complete.
+
+Luke also plans to use **base-gpui**, his GPUI port of Base UI, for its convenient component API and accessibility primitives. This is the intended direction, subject to checking its suitability in the editor.
+
+Suggested responsibility split:
+
+- **Custom GPUI editor surface:** text, selections, gutters, and inline preview rendering.
+- **Pierre ports:** file-tree and diff presentation when those features are scheduled.
+- **base-gpui:** surrounding controls such as menus, dialogs, tooltips, and buttons, plus applicable focus and interaction primitives.
+
+Do not make general-purpose component adoption a prerequisite for the main editor or route every text line through it. Accessibility primitives are useful foundations, not proof of end-to-end accessibility: verify keyboard navigation, focus restoration, and platform accessibility exposure in the integrated application.
+
+The file tree should request that Helix open a path and reflect the active document, rather than owning duplicate editor state. Neither the file-tree port's cleanup nor surrounding UI work should expand the initial editor milestone.
 
 ## One canonical document
 
@@ -139,7 +159,11 @@ A rope alone will not fix whole-document parsing and layout on scroll. Conversel
 
 ### 1. Establish ordinary Helix editing in GPUI
 
-Preserve modal commands, transactions, undo, selections, and splits. Keep the terminal frontend functional. Establish matching-build performance baselines before adding previews.
+This is the immediate milestone and takes precedence over every sidebar, diff, and component-port task.
+
+Preserve modal commands, transactions, undo, selections, and splits. Verify file opening and saving, input routing, focus, cursor movement, scrolling, and text rendering. Keep the terminal frontend functional. Establish matching-build performance baselines before adding previews.
+
+Do not require a file tree, Pierre integration, or base-gpui adoption to demonstrate a working main editor.
 
 ### 2. Introduce projection and geometry boundaries
 
@@ -153,9 +177,11 @@ Start with a small feature such as headings. Cache projections and layout, limit
 
 Reuse Kioto's rendering approach selectively. Separate measurement and drawing, cache geometry, and reject outdated results. Test first display, warm-cache redraws, rapid edits, and compilation errors.
 
-### 5. Add sidebar search and diff viewing
+### 5. Add sidebar search and diff viewing (secondary)
 
-Present file-search results in the left-hand area and open results through the canonical editor. Define diff baselines and whether diff panes are read-only before implementing editing interactions. Keep these features separate from the preview engine.
+When editor priorities are satisfied, integrate and refine the existing Pierre file-tree port and pursue the planned diff port. This is optional work if time remains, not part of the immediate editor milestone.
+
+Present file-search results in the left-hand area and open results through the canonical editor. Define diff baselines and whether diff panes are read-only before implementing editing interactions. Use base-gpui for suitable surrounding controls after validating its fit. Keep these features separate from the preview engine.
 
 ## Validation
 
