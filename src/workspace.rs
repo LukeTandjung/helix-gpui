@@ -59,8 +59,14 @@ impl Workspace {
         let theme = Self::theme(&editor, cx);
         let text_style = theme.get("ui.text.info");
         let popup_style = theme.get("ui.popup.info");
-        let popup_bg_color = utils::color_to_hsla(popup_style.bg.unwrap()).unwrap_or(black());
-        let popup_text_color = utils::color_to_hsla(text_style.fg.unwrap()).unwrap_or(white());
+        let popup_bg_color = popup_style
+            .bg
+            .and_then(utils::color_to_hsla)
+            .unwrap_or_else(black);
+        let popup_text_color = text_style
+            .fg
+            .and_then(utils::color_to_hsla)
+            .unwrap_or_else(white);
 
         cx.new_view(|cx| {
             let view = NotificationView::new(popup_bg_color, popup_text_color);
@@ -231,10 +237,20 @@ impl Render for Workspace {
 
         let default_style = editor.theme.get("ui.background");
         let default_ui_text = editor.theme.get("ui.text");
-        let bg_color = utils::color_to_hsla(default_style.bg.unwrap()).unwrap_or(black());
-        let text_color = utils::color_to_hsla(default_ui_text.fg.unwrap()).unwrap_or(white());
+        let bg_color = default_style
+            .bg
+            .and_then(utils::color_to_hsla)
+            .unwrap_or_else(black);
+        let text_color = default_ui_text
+            .fg
+            .and_then(utils::color_to_hsla)
+            .unwrap_or_else(white);
         let window_style = editor.theme.get("ui.window");
-        let border_color = utils::color_to_hsla(window_style.fg.unwrap()).unwrap_or(white());
+        let border_color = window_style
+            .fg
+            .or(window_style.bg)
+            .and_then(utils::color_to_hsla)
+            .unwrap_or(text_color);
 
         let editor_rect = editor.tree.area();
 

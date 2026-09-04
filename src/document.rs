@@ -578,7 +578,10 @@ impl Element for DocumentElement {
 
                 let theme = &editor.theme;
                 let default_style = theme.get("ui.background");
-                let bg_color = color_to_hsla(default_style.bg.unwrap()).unwrap_or(black());
+                let bg_color = default_style
+                    .bg
+                    .and_then(color_to_hsla)
+                    .unwrap_or_else(black);
                 let cursor_style = theme.get("ui.cursor.primary");
                 let bg = fill(bounds, bg_color);
                 let fg_color = color_to_hsla(
